@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
-
+@import './lab-gates.css';
 :root {
   --q-black: #000000;
   --q-white: #ffffff;
@@ -1173,4 +1173,99 @@ p,
 @keyframes qn-nav-loader-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ============================================================
+   LAB: QuantumLänd-style circuit designer additions
+   (font-family and color tokens reused from the existing design
+   system — nothing here introduces a new font or palette)
+   ============================================================ */
+.wire-stack { position: relative; }
+.gate-connector {
+  position: absolute;
+  width: 2px;
+  background: #0f62fe;
+  z-index: 1;
+  transform: translateX(-1px);
+  pointer-events: none;
+}
+.wire-slot .placed.is-target {
+  background: #fff;
+  color: #0f62fe;
+  border: 2px solid #0f62fe;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+
+.qubit-stepper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--q-mono);
+  font-size: 10px;
+  color: #525252;
+  letter-spacing: .08em;
+}
+.qubit-stepper button {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #8d8d8d;
+  background: #fff;
+  color: #161616;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.qubit-stepper button:hover:not(:disabled) { border-color: #0f62fe; color: #0f62fe; }
+.qubit-stepper button:disabled { opacity: .4; cursor: not-allowed; }
+.qubit-stepper b { font-size: 14px; color: #161616; min-width: 12px; text-align: center; }
+
+.execution-strip { flex-direction: column; align-items: stretch; gap: 10px; }
+.execution-code { flex: 1; min-width: 0; }
+.execution-code-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.code-view-toggle { display: flex; gap: 0; }
+.code-view-toggle button {
+  border: 1px solid #c6c6c6;
+  border-left: 0;
+  background: #fff;
+  font-family: var(--q-mono);
+  font-size: 9px;
+  padding: 4px 9px;
+  color: #525252;
+  cursor: pointer;
+}
+.code-view-toggle button:first-child { border-left: 1px solid #c6c6c6; }
+.code-view-toggle button.selected { background: #161616; color: #fff; }
+.execution-code code {
+  display: block;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 130px;
+  overflow-y: auto;
+  padding: 10px 12px;
+  background: #161616;
+  color: #f4f4f4;
+}
+.execution-actions { align-self: flex-end; }
+
+.qubit-picker { display: flex; gap: 6px; margin: 10px 0; }
+.qubit-picker button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #8d8d8d;
+  background: #fff;
+  color: #161616;
+  font-family: var(--q-mono);
+  font-size: 11px;
+  cursor: pointer;
+}
+.qubit-picker button.selected { background: #161616; color: #fff; border-color: #161616; }
+.bloch-mixed { color: #da1e28; }
+
+@media (max-width: 760px) {
+  .qubit-stepper { display: none; }
 }
