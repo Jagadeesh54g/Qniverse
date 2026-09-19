@@ -997,3 +997,180 @@ p,
     transition-duration: .01ms !important;
   }
 }
+
+/* ============================================================
+   LOGO + LOADING (Qniverse mark: purple ring, cyan hand)
+   ============================================================ */
+:root {
+  --qn-logo-ring: #6f3ff5;
+  --qn-logo-hand: #08bdba;
+}
+
+.qn-logo { display: flex; align-items: center; gap: 10px; }
+.qn-mark { display: block; overflow: visible; }
+.qn-word { font-weight: 600; letter-spacing: -.04em; font-size: 21px; color: #161616; }
+.qn-word span { color: var(--qn-logo-ring); }
+
+/* The hand pivots on the ring centre (32,32 in a 64x64 viewBox). */
+.qn-mark .qn-hand { transform-origin: 32px 32px; }
+.qn-mark-spinning .qn-hand { animation: qn-hand-spin 1.15s cubic-bezier(.65,.05,.36,1) infinite; }
+@keyframes qn-hand-spin { to { transform: rotate(360deg); } }
+
+/* Subtle, purposeful comment kept for context: no decorative hover-spin —
+   see NavigationLoader.jsx, the single place a spin is ever shown, and only
+   while a real navigation is in flight. */
+
+.qn-loader-label {
+  font-family: var(--q-mono, ui-monospace, monospace);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #6f6f6f;
+}
+.qn-loader-bar {
+  position: relative;
+  width: 168px;
+  height: 2px;
+  background: #e0e0e0;
+  overflow: hidden;
+}
+.qn-loader-bar i {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, var(--qn-logo-ring), var(--qn-logo-hand));
+  animation: qn-loader-sweep 1.15s ease-in-out infinite;
+}
+@keyframes qn-loader-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* A frozen spinner reads as "broken", so keep a gentle activity cue even when
+   the user has asked for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .qn-mark-spinning .qn-hand {
+    animation: qn-hand-fade 1.8s ease-in-out infinite !important;
+    animation-iteration-count: infinite !important;
+  }
+  .qn-loader-bar i {
+    animation: qn-hand-fade 1.8s ease-in-out infinite !important;
+    animation-iteration-count: infinite !important;
+    width: 100%;
+    transform: none;
+  }
+}
+@keyframes qn-hand-fade { 0%,100% { opacity: 1; } 50% { opacity: .35; } }
+
+/* ============================================================
+   LEARN: documentation-style theory + AI mode
+   ============================================================ */
+.track-group { margin-bottom: 14px; }
+.track-label {
+  font-family: var(--q-mono, ui-monospace, monospace);
+  font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+  color: #8d8d8d; padding: 12px 14px 6px; border-bottom: 1px solid #e8e8e8; margin-bottom: 4px;
+}
+
+.mode-switch { display: flex; gap: 0; margin: 20px 0 24px; border: 1px solid #c6c6c6; width: fit-content; }
+.mode-switch button {
+  padding: 9px 22px; font-size: 13px; background: #fff; color: #525252;
+  border: 0; border-right: 1px solid #c6c6c6; cursor: pointer; transition: background .15s, color .15s;
+}
+.mode-switch button:last-child { border-right: 0; }
+.mode-switch button:hover { background: #f4f4f4; }
+.mode-switch button.selected { background: #161616; color: #fff; }
+
+/* ---- theory documentation ---- */
+.theory-doc { display: grid; grid-template-columns: 190px 1fr; gap: 34px; align-items: start; }
+.doc-toc { position: sticky; top: 86px; border-left: 2px solid #e0e0e0; padding-left: 14px; }
+.doc-toc ol { list-style: none; padding: 8px 0 0; margin: 0; }
+.doc-toc li { margin-bottom: 8px; }
+.doc-toc a { font-size: 12.5px; color: #6f6f6f; text-decoration: none; line-height: 1.35; display: block; }
+.doc-toc a:hover { color: var(--qn-logo-ring); }
+
+.doc-section { padding: 18px 0; border-bottom: 1px solid #f0f0f0; }
+.doc-section h3 { font-size: 17px; margin: 0 0 8px; letter-spacing: -.01em; }
+.doc-section p { font-size: 15px; line-height: 1.62; color: #393939; margin: 0; }
+
+.doc-callout { padding: 18px 20px; margin-top: 22px; border-left: 3px solid var(--qn-logo-ring); background: #f7f5ff; }
+.doc-callout p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.6; color: #393939; }
+.doc-callout-warn { border-left-color: #d97706; background: #fff8ed; }
+.doc-callout-lab { border-left-color: var(--qn-logo-hand); background: #effbfa; }
+.doc-callout-lab .primary-btn { margin-top: 14px; display: inline-block; }
+.callout-tag {
+  font-family: var(--q-mono, ui-monospace, monospace);
+  font-size: 10px; letter-spacing: .14em; color: #6f6f6f;
+}
+
+/* ---- quick check ---- */
+.quick-check { margin-top: 22px; padding: 18px 20px; border: 1px solid #c6c6c6; background: #fff; }
+.qc-question { font-size: 15px; font-weight: 500; margin: 10px 0 14px; }
+.qc-options { display: flex; flex-direction: column; gap: 8px; }
+.qc-opt {
+  text-align: left; padding: 10px 14px; border: 1px solid #c6c6c6; background: #fff;
+  font-size: 14px; cursor: pointer; transition: border-color .15s, background .15s;
+}
+.qc-opt:hover:enabled { border-color: var(--qn-logo-ring); }
+.qc-right { border-color: #0e8a6a; background: #eafaf4; color: #05603a; }
+.qc-wrong { border-color: #da1e28; background: #fff1f1; color: #a2191f; }
+.qc-dim { opacity: .5; }
+.qc-feedback { margin: 14px 0 0; font-size: 14px; color: #a2191f; line-height: 1.55; }
+.qc-feedback.qc-ok { color: #05603a; }
+
+/* ---- AI mode ---- */
+.ai-mode { border: 1px solid #c6c6c6; background: #fff; }
+.ai-depth { padding: 16px 20px; border-bottom: 1px solid #e0e0e0; }
+.depth-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.depth-pill {
+  padding: 7px 16px; border: 1px solid #c6c6c6; background: #fff;
+  font-size: 12.5px; cursor: pointer; transition: all .15s;
+}
+.depth-pill:hover { border-color: var(--qn-logo-ring); }
+.depth-pill.selected { background: var(--qn-logo-ring); border-color: var(--qn-logo-ring); color: #fff; }
+
+.ai-thread { padding: 20px; min-height: 260px; max-height: 420px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+.ai-msg { padding: 12px 16px; font-size: 14.5px; line-height: 1.6; max-width: 88%; white-space: pre-wrap; }
+.ai-bot { background: #f4f4f4; border-left: 2px solid var(--qn-logo-hand); align-self: flex-start; }
+.ai-user { background: var(--qn-logo-ring); color: #fff; align-self: flex-end; }
+.ai-typing { color: #6f6f6f; font-style: italic; }
+
+.ai-quick { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 20px 16px; border-bottom: 1px solid #e0e0e0; }
+.ai-quick button {
+  padding: 7px 13px; border: 1px solid #c6c6c6; background: #fff;
+  font-size: 12px; cursor: pointer; transition: all .15s;
+}
+.ai-quick button:hover:enabled { border-color: var(--qn-logo-hand); color: var(--qn-logo-hand); }
+.ai-quick button:disabled { opacity: .5; cursor: not-allowed; }
+
+.ai-composer { display: flex; gap: 10px; padding: 16px 20px; }
+.ai-composer input {
+  flex: 1; height: 40px; border: 1px solid #8d8d8d; background: #fff;
+  padding: 0 12px; font-size: 14px; font-family: inherit;
+}
+.ai-composer input:focus { outline: 2px solid var(--qn-logo-ring); outline-offset: -2px; }
+
+@media (max-width: 900px) {
+  .theory-doc { grid-template-columns: 1fr; gap: 20px; }
+  .doc-toc { position: static; display: none; }
+  .ai-msg { max-width: 100%; }
+}
+
+/* ---- Global navigation loader (guarantees a minimum visible duration) ---- */
+.qn-nav-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(2px);
+  animation: qn-nav-loader-in .15s ease;
+}
+@keyframes qn-nav-loader-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

@@ -2,6 +2,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import TutorPanel from '@/components/TutorPanel';
 import ToastHost from '@/components/ToastHost';
+import NavigationLoader from '@/components/NavigationLoader';
 import { ProgressProvider } from '@/lib/progress';
 
 export const metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({ children }) {
 
             <TutorPanel />
             <ToastHost />
+            <NavigationLoader />
           </ProgressProvider>
         </div>
       </body>
