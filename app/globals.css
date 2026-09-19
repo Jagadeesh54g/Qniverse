@@ -1269,3 +1269,11 @@ p,
 @media (max-width: 760px) {
   .qubit-stepper { display: none; }
 }
+/* Text left, animation right — independent of DOM order */
+.hero-copy   { grid-column: 1; grid-row: 1; }
+.hero-visual { grid-column: 2; grid-row: 1; }
+
+/* Phones: text first, animation underneath */
+@media (max-width: 760px) {
+  .hero-visual { grid-column: 1; grid-row: 2; }
+}

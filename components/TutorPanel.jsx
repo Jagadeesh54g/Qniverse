@@ -83,7 +83,7 @@ export default function TutorPanel() {
           onClick={() => setOpen(true)}
           aria-label="Open Qniverse AI Tutor"
         >
-          ✦ Ask Qniverse
+          ✦ Ask Bujji
         </button>
       )}
 
