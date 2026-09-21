@@ -1,4 +1,6 @@
 import './globals.css';
+import './onboarding.css';
+import './auth.css';
 import Navbar from '@/components/Navbar';
 import TutorPanel from '@/components/TutorPanel';
 import ToastHost from '@/components/ToastHost';
