@@ -1,82 +1,295 @@
 import { getAuthUser } from '@/lib/auth';
 
 const DEPTH_STYLE = {
-  simple: 'Explain at a complete-beginner level. Short sentences, everyday analogies, no matrices unless asked. Assume no physics background.',
-  university: 'Explain at undergraduate level. Use Dirac notation and 2x2 matrices freely, state assumptions, and show the key algebraic steps.',
-  advanced: 'Explain at graduate level. Be precise about unitarity, density matrices, partial traces and basis choices. Skip hand-holding.',
-  research: 'Explain at research level. Reference the relevant theorems, complexity classes, error models and open problems. Assume full fluency.',
+  simple:
+    'Explain at a complete-beginner level. Use simple language, intuition and everyday analogies. Avoid heavy mathematics unless requested.',
+
+  university:
+    'Explain at undergraduate quantum-computing level. Use Dirac notation, matrices and equations when useful. Show important reasoning steps.',
+
+  advanced:
+    'Explain at graduate level. Be mathematically precise. Discuss unitarity, statevectors, tensor products, density matrices and quantum algorithms when relevant.',
+
+  research:
+    'Explain at research level. Be rigorous about assumptions, algorithms, complexity, noise, error models and relevant theoretical details.',
 };
 
 function lessonSystemPrompt(ctx) {
-  const depth = DEPTH_STYLE[ctx?.depth] || DEPTH_STYLE.simple;
+  const depth =
+    DEPTH_STYLE[ctx?.depth] ||
+    DEPTH_STYLE.university;
+
   return [
-    'You are Bujji, the AI quantum tutor inside Qniverse.',
-    `The learner is currently studying the lesson "${ctx?.topic || 'quantum computing'}" (marked ${ctx?.level || 'Foundation'} level).`,
-    ctx?.formula ? `Its key expression is: ${ctx.formula}` : '',
-    ctx?.summary ? `The lesson documentation says: ${ctx.summary}` : '',
-    ctx?.misconception ? `A misconception to watch for: ${ctx.misconception}` : '',
+    'You are Bujji, the AI quantum-computing tutor inside Qniverse.',
+    'Your job is to help learners understand quantum computing rather than simply give answers.',
+    `The learner is currently studying: ${ctx?.topic || 'quantum computing'}.`,
+    `Current level: ${ctx?.level || 'Foundation'}.`,
+    ctx?.formula
+      ? `Important formula: ${ctx.formula}`
+      : '',
+    ctx?.summary
+      ? `Lesson summary: ${ctx.summary}`
+      : '',
+    ctx?.misconception
+      ? `Common misconception to address: ${ctx.misconception}`
+      : '',
     depth,
-    'Stay on this topic unless the learner clearly moves on. Prefer concrete circuits the learner can build in the Qniverse Lab. Encourage prediction before execution. Be warm, rigorous and direct.',
-  ].filter(Boolean).join(' ');
+    'Explain intuition first and mathematics second.',
+    'Use small quantum circuits when appropriate.',
+    'Encourage the learner to predict the result before running a circuit.',
+    'Do not invent simulation results.',
+    'Stay focused on the current topic unless the learner explicitly changes topics.',
+    'Be rigorous, friendly and concise.',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
-function localLessonAnswer(question, ctx) {
-  const topic = ctx?.topic || 'this topic';
-  const q = question.toLowerCase();
-  const summary = ctx?.summary || '';
-  const first = summary.split('. ').slice(0, 3).join('. ');
-  if (q.includes('analogy')) return `Bujji is running offline. Here is the lesson material for ${topic}.\n\n${first}.\n\nFor a generated analogy, configure OPENAI_API_KEY on the server.`;
-  if (q.includes('quiz') || q.includes('question')) return `Offline mode — use the Quick Check in the Theory tab for ${topic}. For generated quizzes, configure OPENAI_API_KEY on the server.`;
-  if (q.includes('math') || q.includes('equation')) return `Key expression for ${topic}: ${ctx?.formula || 'see the Theory tab'}.\n\n${first}.`;
-  return `Bujji is running offline. Here is what the ${topic} documentation covers:\n\n${first || 'Open the Theory tab for the full write-up.'}`;
+function generalSystemPrompt(context) {
+  return [
+    'You are Bujji, the AI quantum-computing tutor inside Qniverse.',
+    'Qniverse is an interactive quantum learning laboratory.',
+    'Teach quantum computing using intuition, mathematics, circuits and experiments.',
+    'Prefer explanation over simply giving the final answer.',
+    'When useful, suggest a circuit the learner can build in the Qniverse Lab.',
+    'Encourage prediction before execution.',
+    'Never claim that a circuit was simulated unless simulation results are explicitly provided.',
+    context?.topic
+      ? `Current topic: ${context.topic}`
+      : '',
+    context?.level
+      ? `Learner level: ${context.level}`
+      : '',
+    context?.depth
+      ? DEPTH_STYLE[context.depth] || ''
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
-function localTutor(question, context, kind) {
-  if (kind === 'lesson') return localLessonAnswer(question, context);
-  const x = question.toLowerCase();
-  if (x.includes('superposition')) return 'Superposition means a qubit can be represented as α|0⟩ + β|1⟩, with |α|² + |β|² = 1. Try H on |0⟩ in the Lab and run 1,000 shots.';
-  if (x.includes('entangle')) return 'Try H(q0) followed by CNOT(q0,q1). H creates the superposition; CNOT correlates the second qubit with the first. Look for 00 and 11 outcomes.';
-  if (x.includes('h²') || x.includes('twice')) return 'Hadamard is its own inverse: H·H = I. Applying H twice returns a computational-basis state to itself.';
-  return 'Start with one question, build the smallest circuit that tests it, run several shots, and compare the result with your prediction.';
+function offlineAnswer(question, context, kind) {
+  const q = String(question || '').toLowerCase();
+
+  if (q.includes('superposition')) {
+    return `A qubit in superposition can be written as
+
+|ψ⟩ = α|0⟩ + β|1⟩
+
+where |α|² + |β|² = 1.
+
+Try this in the Qniverse Lab:
+
+|0⟩ → H → Measure
+
+You should observe approximately 50% |0⟩ and 50% |1⟩ over many shots.`;
+  }
+
+  if (
+    q.includes('entangle') ||
+    q.includes('entanglement')
+  ) {
+    return `Try:
+
+q0: |0⟩ ── H ── ● ──
+                 │
+q1: |0⟩ ─────── X ──
+
+The H gate creates superposition and the CNOT correlates the two qubits.
+
+The resulting Bell state is:
+
+(|00⟩ + |11⟩)/√2`;
+  }
+
+  if (
+    q.includes('h²') ||
+    q.includes('h2') ||
+    q.includes('hadamard twice')
+  ) {
+    return `Hadamard is self-inverse:
+
+H² = I
+
+So applying H twice returns the qubit to its original computational-basis state.`;
+  }
+
+  if (kind === 'lesson' && context?.summary) {
+    return `Bujji is currently running in local fallback mode.
+
+Current lesson:
+${context.topic || 'Quantum Computing'}
+
+${context.summary}`;
+  }
+
+  return `Bujji is currently running without the Qwen server.
+
+Try asking about:
+• Superposition
+• Measurement
+• Hadamard
+• Entanglement
+• Quantum gates
+• Bloch sphere
+• Quantum circuits`;
 }
 
-export async function POST(req) {
+async function callQwen(messages) {
+  const baseUrl =
+    process.env.QWEN_BASE_URL ||
+    'http://localhost:11434';
+
+  const model =
+    process.env.QWEN_MODEL ||
+    'qwen2.5:7b';
+
+  const url =
+    `${baseUrl.replace(/\/$/, '')}/api/chat`;
+
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  // Optional authentication for a hosted Ollama server.
+  if (process.env.QWEN_API_KEY) {
+    headers.Authorization =
+      `Bearer ${process.env.QWEN_API_KEY}`;
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      messages,
+      stream: false,
+      options: {
+        temperature: 0.2,
+      },
+    }),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    throw new Error(
+      `Qwen server returned ${response.status}: ${errorText}`
+    );
+  }
+
+  const data = await response.json();
+
+  return (
+    data?.message?.content ||
+    data?.response ||
+    ''
+  );
+}
+
+export async function POST(request) {
   const user = await getAuthUser();
-  if (!user) return Response.json({ answer: 'Please sign in to use Bujji.' }, { status: 401 });
+
+  if (!user) {
+    return Response.json(
+      {
+        answer: 'Please sign in to use Bujji.',
+      },
+      { status: 401 }
+    );
+  }
 
   try {
-    const { question, context, kind } = await req.json();
-    if (!question) return Response.json({ answer: 'Ask me a quantum question.' }, { status: 400 });
+    const body = await request.json();
 
-    if (!process.env.OPENAI_API_KEY) {
-      return Response.json({ answer: localTutor(question, context, kind) });
+    const question =
+      String(body.question || '').trim();
+
+    const context =
+      body.context || {};
+
+    const kind =
+      body.kind || 'general';
+
+    if (!question) {
+      return Response.json(
+        {
+          answer:
+            'Ask Bujji a quantum-computing question.',
+        },
+        { status: 400 }
+      );
     }
 
-    const system = kind === 'lesson'
-      ? lessonSystemPrompt(context)
-      : 'You are Bujji, a rigorous but beginner-friendly quantum computing tutor inside Qniverse. Explain intuition first, then mathematics. Never pretend a simulation result is known if it is not in context.';
+    const system =
+      kind === 'lesson'
+        ? lessonSystemPrompt(context)
+        : generalSystemPrompt(context);
 
-    const r = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    const messages = [
+      {
+        role: 'system',
+        content: system,
       },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-5-mini',
-        temperature: 0.2,
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: `Question: ${question}\nContext: ${JSON.stringify(context || {})}` },
-        ],
-      }),
-    });
+      {
+        role: 'user',
+        content:
+          `Question: ${question}\n\n` +
+          `Current Qniverse context:\n` +
+          JSON.stringify(context, null, 2),
+      },
+    ];
 
-    const j = await r.json();
-    if (!r.ok) throw new Error(j.error?.message || 'OpenAI request failed');
-    return Response.json({ answer: j.choices?.[0]?.message?.content || 'No answer returned.' });
+    try {
+      const answer =
+        await callQwen(messages);
+
+      if (!answer.trim()) {
+        throw new Error(
+          'Qwen returned an empty response.'
+        );
+      }
+
+      return Response.json({
+        answer,
+        provider: 'qwen',
+        model:
+          process.env.QWEN_MODEL ||
+          'qwen2.5:7b',
+      });
+    } catch (qwenError) {
+      console.error(
+        '[Qniverse Bujji / Qwen]',
+        qwenError
+      );
+
+      // Keep Bujji usable even when the model server
+      // is unavailable.
+      return Response.json({
+        answer: offlineAnswer(
+          question,
+          context,
+          kind
+        ),
+        provider: 'offline-fallback',
+        model:
+          process.env.QWEN_MODEL ||
+          'qwen2.5:7b',
+      });
+    }
   } catch (error) {
-    console.error('[Qniverse tutor]', error);
-    return Response.json({ answer: 'Bujji could not reach the model right now. The Theory and Lab remain available.', error: process.env.NODE_ENV === 'production' ? undefined : String(error.message || error) }, { status: 200 });
+    console.error(
+      '[Qniverse Bujji]',
+      error
+    );
+
+    return Response.json(
+      {
+        answer:
+          'Bujji encountered an unexpected error. Please try again.',
+      },
+      { status: 200 }
+    );
   }
 }
