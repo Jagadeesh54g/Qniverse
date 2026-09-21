@@ -1,3 +1,11 @@
-'use client';
-import {useState} from 'react';import Link from 'next/link';import {challenges} from '@/lib/content';import {useCircuitSession,toast} from '@/lib/session';import {useProgress} from '@/lib/progress';
-export default function Challenges(){const [active,setActive]=useState(challenges[0]);const {circuit}=useCircuitSession();const {data,completeChallenge}=useProgress();const c=circuit||[];const valid=active.validate(c);return <div className="container page"><div className="page-heading"><div><div className="eyebrow">CHALLENGE ARENA</div><h1>Don't just run it.<br/><em>Predict it.</em></h1></div><p className="heading-note">Each challenge is validated against your circuit — not against a multiple-choice answer.</p></div><div className="challenge-grid"><aside className="challenge-list">{challenges.map(x=><button key={x.id} className={active.id===x.id?'challenge-item selected':'challenge-item'} onClick={()=>setActive(x)}><span>{x.difficulty}</span><b>{x.title}</b><small>+{x.xp} XP · {data.challenges[x.id]||0}%</small></button>)}</aside><section className="challenge-detail"><div className="challenge-badge">{active.difficulty.toUpperCase()} · +{active.xp} XP</div><h2>{active.title}</h2><p className="challenge-goal">{active.goal}</p><div className="prediction"><div><span className="eyebrow">YOUR CURRENT CIRCUIT</span><code>{c.length?c.map(g=>`${g.name}(q${g.qubit})`).join(' → '):'No circuit yet'}</code></div><div className={valid?'validation success':'validation'}><span>{valid?'✓':'○'}</span><b>{valid?'Requirement satisfied':'Requirement not satisfied'}</b><small>{valid?'You can submit this solution.':'Modify your circuit in the Quantum Lab.'}</small></div></div><div className="hint"><span>✦</span><div><b>AI-style hint</b><p>{active.hint}</p></div></div><div className="challenge-actions"><Link href="/playground" className="ghost-btn">Open Quantum Lab</Link><button className="primary-btn" disabled={!valid} onClick={()=>{completeChallenge(active.id,100);toast('Challenge completed — mastery updated')}}>Submit solution ✓</button></div></section></div></div>}
+import ChallengeList from '../../components/challenges/ChallengeList.jsx';
+import './challenges.css';
+
+export const metadata = {
+  title: 'Challenges · Qniverse',
+  description: 'Twenty hands-on quantum circuit challenges, graded in your browser.',
+};
+
+export default function ChallengesPage() {
+  return <ChallengeList />;
+}

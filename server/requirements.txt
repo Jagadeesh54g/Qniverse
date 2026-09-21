@@ -1,0 +1,5 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+qiskit>=1.0
+cirq-core>=1.3
+pennylane>=0.36
