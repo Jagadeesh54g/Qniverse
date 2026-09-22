@@ -35,3 +35,120 @@ const AssessmentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export const LearnerAssessment = mongoose.models.QniverseLearnerAssessment || mongoose.model('QniverseLearnerAssessment', AssessmentSchema);
+/* =========================================================
+   QNIVERSE COMMUNITY
+   ========================================================= */
+
+const CommunityPostSchema = new mongoose.Schema(
+  {
+    authorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'QniverseUser',
+      required: true,
+      index: true,
+    },
+
+    authorName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 80,
+    },
+
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 140,
+    },
+
+    body: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 4000,
+    },
+
+    tag: {
+      type: String,
+      default: 'General',
+      trim: true,
+      maxlength: 40,
+    },
+
+    likes: {
+      type: Number,
+      default: 0,
+    },
+
+    replies: {
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+CommunityPostSchema.index({
+  createdAt: -1,
+});
+
+export const CommunityPost =
+  mongoose.models.QniverseCommunityPost ||
+  mongoose.model(
+    'QniverseCommunityPost',
+    CommunityPostSchema
+  );
+
+
+/* =========================================================
+   COMMUNITY REPLIES
+   ========================================================= */
+
+const CommunityReplySchema = new mongoose.Schema(
+  {
+    postId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'QniverseCommunityPost',
+      required: true,
+      index: true,
+    },
+
+    authorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'QniverseUser',
+      required: true,
+    },
+
+    authorName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 80,
+    },
+
+    body: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 2000,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+CommunityReplySchema.index({
+  postId: 1,
+  createdAt: 1,
+});
+
+export const CommunityReply =
+  mongoose.models.QniverseCommunityReply ||
+  mongoose.model(
+    'QniverseCommunityReply',
+    CommunityReplySchema
+  );
